@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow | Simple Pomodoro Timer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6">
+
+    <!-- Header -->
+    <header class="w-full max-w-md text-center py-4">
+        <h1 class="text-2xl font-bold tracking-tight text-teal-400 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left"></i> FocusFlow
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">Boost productivity with structured intervals</p>
+    </header>
+
+    <!-- Main Card -->
+    <main class="w-full max-w-md bg-slate-800/60 border border-slate-700/60 rounded-2xl p-8 shadow-xl backdrop-blur-sm text-center">
+        
+        <!-- Mode Tabs -->
+        <div class="flex justify-center gap-2 mb-8 bg-slate-900/60 p-1.5 rounded-xl">
+            <button onclick="switchMode('pomodoro')" id="btn-pomodoro" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-teal-500 text-slate-950 transition">Pomodoro</button>
+            <button onclick="switchMode('shortBreak')" id="btn-shortBreak" class="flex-1 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition">Short Break</button>
+            <button onclick="switchMode('longBreak')" id="btn-longBreak" class="flex-1 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition">Long Break</button>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="text-6xl font-mono font-extrabold tracking-wider text-white mb-8" id="timer-display">
+            25:00
+        </div>
+
+        <!-- Controls -->
+        <div class="flex justify-center gap-4">
+            <button id="start-btn" onclick="toggleTimer()" class="px-8 py-3 rounded-xl bg-teal-500 text-slate-950 font-bold hover:bg-teal-400 transition shadow-lg shadow-teal-500/20">
+                Start
+            </button>
+            <button onclick="resetTimer()" class="px-5 py-3 rounded-xl bg-slate-700 text-slate-200 font-medium hover:bg-slate-600 transition">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-xs text-slate-500 py-4">
+        Built with HTML & Tailwind CSS ✨
+    </footer>
+
+    <!-- App Logic -->
+    <script>
+        let timerMinutes = 25;
+        let timerSeconds = 0;
+        let interval = null;
+        let isRunning = false;
+        let currentMode = 'pomodoro';
+
+        const modes = {
+            pomodoro: 25,
+            shortBreak: 5,
+            longBreak: 15
+        };
+
+        const display = document.getElementById('timer-display');
+        const startBtn = document.getElementById('start-btn');
+
+        function updateDisplay() {
+            const m = String(timerMinutes).padStart(2, '0');
+            const s = String(timerSeconds).padStart(2, '0');
+            display.textContent = `${m}:${s}`;
+            document.title = `${m}:${s} - FocusFlow`;
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            clearInterval(interval);
+            isRunning = false;
+            startBtn.textContent = 'Start';
+            timerMinutes = modes[mode];
+            timerSeconds = 0;
+
+            // Update tab styles
+            Object.keys(modes).forEach(m => {
+                const btn = document.getElementById(`btn-${m}`);
+                if (m === mode) {
+                    btn.className = "flex-1 py-2 text-xs font-semibold rounded-lg bg-teal-500 text-slate-950 transition";
+                } else {
+                    btn.className = "flex-1 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition";
+                }
+            });
+            updateDisplay();
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(interval);
+                isRunning = false;
+                startBtn.textContent = 'Start';
+            } else {
+                isRunning = true;
+                startBtn.textContent = 'Pause';
+                interval = setInterval(() => {
+                    if (timerSeconds === 0) {
+                        if (timerMinutes === 0) {
+                            clearInterval(interval);
+                            isRunning = false;
+                            alert('Session completed!');
+                            startBtn.textContent = 'Start';
+                            return;
+                        }
+                        timerMinutes--;
+                        timerSeconds = 59;
+                    } else {
+                        timerSeconds--;
+                    }
+                    updateDisplay();
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(interval);
+            isRunning = false;
+            startBtn.textContent = 'Start';
+            timerMinutes = modes[currentMode];
+            timerSeconds = 0;
+            updateDisplay();
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
